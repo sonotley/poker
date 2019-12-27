@@ -138,64 +138,64 @@ def build_hands_dict(cards, path):
         pickle.dump(ranked_hands_dict, f)
 
 # Uncomment this to build the pre-calculated dict of hand ranks
-# build_hands_dict(cards, r'D:\hands.p')
+build_hands_dict(cards, r'hands.p')
 
-with open(r'D:\hands.p','rb') as f:
-    ranked_hands_dict = pickle.load(f)
-
-# Function that given board and 2 cards gives back tuple of the best possible hand by searching through ranked_hands_dict keys
-def find_the_best_hand(board, hand):
-
-    seven_card_hand = set(board) | hand
-    evaluated_all_possible_hands = []
-
-    all_possible_hands = itertools.combinations(seven_card_hand, 5)
-    for hand in all_possible_hands:
-        evaluated_all_possible_hands.append(ranked_hands_dict[tuple(sorted(hand))])
-
-    return max(evaluated_all_possible_hands)
-
-
-hand1 = {'2h', '7d'}
-hand2 = {'Ad', 'Ah'}
-
-# HAND vs. HAND EVALUATOR
-
-t0 = time.time()
-
-one = 0
-two = 0
-tie = 0
-
-deadcards = hand1 | hand2
-possible_boards = itertools.combinations(cards - deadcards, 5)
-
-n = 0
-for board in possible_boards:
-
-    hand1rank = find_the_best_hand(board, hand1)
-    hand2rank = find_the_best_hand(board, hand2)
-
-    if hand1rank > hand2rank:
-        one = one + 1
-
-    elif hand1rank < hand2rank:
-        two = two + 1
-
-    else: #hand1rank == hand2rank:
-        tie = tie + 1
-
-    n += 1
-
-onepercent = (one/n)*100
-twopercent = (two/n)*100
-tiepercent = (tie/n)*100
-
-print(onepercent, twopercent, tiepercent)
-
-
-t1 = time.time()
-
-total = t1-t0
-
-print(total)
+# with open(r'hands.p','rb') as f:
+#     ranked_hands_dict = pickle.load(f)
+#
+# # Function that given board and 2 cards gives back tuple of the best possible hand by searching through ranked_hands_dict keys
+# def find_the_best_hand(board, hand):
+#
+#     seven_card_hand = set(board) | hand
+#     evaluated_all_possible_hands = []
+#
+#     all_possible_hands = itertools.combinations(seven_card_hand, 5)
+#     for hand in all_possible_hands:
+#         evaluated_all_possible_hands.append(ranked_hands_dict[tuple(sorted(hand))])
+#
+#     return max(evaluated_all_possible_hands)
+#
+#
+# hand1 = {'2h', '7d'}
+# hand2 = {'Ad', 'Ah'}
+#
+# # HAND vs. HAND EVALUATOR
+#
+# t0 = time.time()
+#
+# one = 0
+# two = 0
+# tie = 0
+#
+# deadcards = hand1 | hand2
+# possible_boards = itertools.combinations(cards - deadcards, 5)
+#
+# n = 0
+# for board in possible_boards:
+#
+#     hand1rank = find_the_best_hand(board, hand1)
+#     hand2rank = find_the_best_hand(board, hand2)
+#
+#     if hand1rank > hand2rank:
+#         one = one + 1
+#
+#     elif hand1rank < hand2rank:
+#         two = two + 1
+#
+#     else: #hand1rank == hand2rank:
+#         tie = tie + 1
+#
+#     n += 1
+#
+# onepercent = (one/n)*100
+# twopercent = (two/n)*100
+# tiepercent = (tie/n)*100
+#
+# print(onepercent, twopercent, tiepercent)
+#
+#
+# t1 = time.time()
+#
+# total = t1-t0
+#
+# print(total)

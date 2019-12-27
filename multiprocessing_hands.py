@@ -44,7 +44,7 @@ if __name__ == '__main__':
         for rank in ranks:
             cards.add(rank + suit)
 
-    with open(r'D:\hands.p','rb') as f:
+    with open(r'hands.p','rb') as f:
         ranked_hands_dict = pickle.load(f)
 
     hand1 = {'2h', '7d'}
