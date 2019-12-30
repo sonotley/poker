@@ -3,6 +3,7 @@ import itertools
 import pickle
 from ctypes import c_longlong
 import time
+import psutil
 
 
 def get_print(q):
@@ -90,6 +91,11 @@ def get_board_and_score2(ls, hand1, hand2, ranked_hands_dict, n, one, two,i):
     one_local = 0
     two_local = 0
     print(len(ls),'--',i)
+    this_process = psutil.Process()
+    try:
+        this_process.cpu_affinity([i])
+    except AttributeError:
+        print("CPU affinity not supported")
 
     for board in ls:
 
@@ -131,7 +137,7 @@ if __name__ == '__main__':
     print(len(possible_boards))
 
     processes = []
-    num_processes = 4
+    num_processes = 1
     for i in range(num_processes):
         processes.append(mp.Process(target=get_board_and_score2,
                                     args=(possible_boards[i::num_processes], hand1, hand2, ranked_hands_dict, n, one, two,i)))
