@@ -1,6 +1,6 @@
 import itertools
 import time
-import pickle
+import json
 
 ranks = ['2','3','4','5','6','7','8','9','T','J','Q','K','A']
 names ="Deuces Threes Fours Fives Sixes Sevens Eights Nines Tens Jacks Queens Kings Aces"
@@ -14,16 +14,6 @@ cards = set()
 for suit in suits:
     for rank in ranks:
         cards.add(rank + suit)
-
-
-def rank_integer(rank_tuple):
-    m = 100 ** 5
-    score = 0
-    for x in rank_tuple:
-        score += x * m
-        m /= 100
-
-    return int(score)
 
 
 # Function dict_hand_rank ranks every board and returns a tuple (board) (value)
@@ -132,67 +122,30 @@ def hand_rank_dict(hand):
             + " " + cardnames[kickers[2] - 2] +  " " + cardnames[kickers[3] - 2] + " " + cardnames[kickers[4] - 2]
         handrankValue = (0,) + tuple(kickers)
 
-    return {tuple(sorted(hand)) : rank_integer(handrankValue)}
+    return {''.join(sorted(hand)): rank_integer(handrankValue)}
 
 
-def build_hands_dict(cards, path):
+def build_hands_dict(deck, path):
 
     ranked_hands_dict = {}
     t0 = time.time()
-    for board in itertools.combinations(cards, 5):
-        ranked_hands_dict.update(hand_rank_dict(board))
+    for five_card_hand in itertools.combinations(deck, 5):
+        ranked_hands_dict.update(hand_rank_dict(five_card_hand))
     t1 = time.time()
     total = t1-t0
     print(total)
-    with open(path,'wb') as f:
-        pickle.dump(ranked_hands_dict, f)
-
-# Uncomment this to build the pre-calculated dict of hand ranks
-build_hands_dict(cards, r'hands.p')
-
-# Function that given board and 2 cards gives back tuple of the best possible hand by searching through ranked_hands_dict keys
-def find_the_best_hand(board, hand, ranked_hands_dict):
-
-    seven_card_hand = set(board) | hand
-    evaluated_all_possible_hands = []
-
-    all_possible_hands = itertools.combinations(seven_card_hand, 5)
-    for hand in all_possible_hands:
-        evaluated_all_possible_hands.append(ranked_hands_dict[tuple(sorted(hand))])
-
-    return max(evaluated_all_possible_hands)
+    with open(path,'w') as f:
+        json.dump(ranked_hands_dict, f)
 
 
-def hand_v_hand(hand1={'2h', '7d'},hand2={'Ad', 'Ah'}):
+def rank_integer(rank_tuple):
+    m = 100 ** 5
+    score = 0
+    for x in rank_tuple:
+        score += x * m
+        m /= 100
 
-    with open(r'hands.p','rb') as f:
-        ranked_hands_dict = pickle.load(f)
-
-    one = 0
-    two = 0
-    tie = 0
-
-    deadcards = hand1 | hand2
-    possible_boards = itertools.combinations(cards - deadcards, 5)
-
-    n = 0
-    for board in possible_boards:
-
-        hand1rank = find_the_best_hand(board, hand1,ranked_hands_dict)
-        hand2rank = find_the_best_hand(board, hand2,ranked_hands_dict)
-
-        if hand1rank > hand2rank:
-            one = one + 1
-
-        elif hand1rank < hand2rank:
-            two = two + 1
-
-        else: #hand1rank == hand2rank:
-            tie = tie + 1
-
-        n += 1
-
-    return one, two, tie
+    return int(score)
 
 
-
+build_hands_dict(cards, r'hands.json')
