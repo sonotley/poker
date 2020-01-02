@@ -138,10 +138,10 @@ def build_hands_dict(cards, path):
         pickle.dump(ranked_hands_dict, f)
 
 # Uncomment this to build the pre-calculated dict of hand ranks
-# build_hands_dict(cards, r'hands.p')
+build_hands_dict(cards, r'hands.p')
 
 # Function that given board and 2 cards gives back tuple of the best possible hand by searching through ranked_hands_dict keys
-def find_the_best_hand(board, hand):
+def find_the_best_hand(board, hand, ranked_hands_dict):
 
     seven_card_hand = set(board) | hand
     evaluated_all_possible_hands = []
@@ -168,8 +168,8 @@ def hand_v_hand(hand1={'2h', '7d'},hand2={'Ad', 'Ah'}):
     n = 0
     for board in possible_boards:
 
-        hand1rank = find_the_best_hand(board, hand1)
-        hand2rank = find_the_best_hand(board, hand2)
+        hand1rank = find_the_best_hand(board, hand1,ranked_hands_dict)
+        hand2rank = find_the_best_hand(board, hand2,ranked_hands_dict)
 
         if hand1rank > hand2rank:
             one = one + 1

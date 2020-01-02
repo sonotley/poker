@@ -94,6 +94,7 @@ def get_board_and_score2(ls, hand1, hand2, ranked_hands_dict, n, one, two,i):
     this_process = psutil.Process()
     try:
         this_process.cpu_affinity([i])
+
     except AttributeError:
         print("CPU affinity not supported")
 
