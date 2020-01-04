@@ -2,19 +2,15 @@ import itertools
 import time
 import pickle
 
-ranks = ['2','3','4','5','6','7','8','9','T','J','Q','K','A']
-names ="Deuces Threes Fours Fives Sixes Sevens Eights Nines Tens Jacks Queens Kings Aces"
-cardnames = names.split()
-suitsall = "hearts spades diamonds clubs"
-suitnames = suitsall.split()
-suits = ['h','s','d','c']
+
+ranks = ['2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A']
+suits = ['h', 's', 'd', 'c']
 cards = set()
 
 # Create all cards from suits and ranks
 for suit in suits:
     for rank in ranks:
         cards.add(rank + suit)
-
 
 def rank_integer(rank_tuple):
     m = 100 ** 5
@@ -72,70 +68,50 @@ def hand_rank_dict(hand):
     if '11111' in joined_histogram:
         isStraight = True
         straightHeight = joined_histogram.find('11111') + 5
-        straightName = cardnames[straightHeight - 2]
-        handName = "Straight"
         handrankValue = (4,) + (straightHeight,)
 
     # check if a hand is a flush
 
     if all(x == suits[0] for x in suits):
         isFlush = True
-        handName = "Flush " + cardnames[kickers[0] - 2] + " " + cardnames[kickers[1] - 2] \
-              + " " + cardnames[kickers[2] - 2] +  " " + cardnames[kickers[3] - 2] + " " + cardnames[kickers[4] - 2]
         handrankValue = (5,) + tuple(kickers)
 
     # check if a hand is a straight and a flush
 
     if isFlush & isStraight:
-        isStraightFlush = True
-        handName = "Straight Flush"
         handrankValue = (8,) + (straightHeight,)
 
     # check if a hand is four of a kind
-    if '4' in  joined_histogram:
-        fourofakindcard = (joined_histogram[1:].find('4') + 2)
-        handName = "Four of a Kind " + cardnames[fourofakindcard -2] + " " + cardnames[kickers[0] - 2] + " kicker"
+    elif '4' in  joined_histogram:
         handrankValue = (7,) + ((joined_histogram[1:].find('4') + 2),) + tuple(kickers)
 
     # check if a hand is a full house
-    if ('3' in joined_histogram) & ('2' in joined_histogram):
-        handName = "Full house"
+    elif ('3' in joined_histogram) & ('2' in joined_histogram):
         handrankValue = (6,) + ((joined_histogram[1:].find('3') + 2),) + ((joined_histogram[1:].find('2') + 2),) + tuple(kickers)
 
-
     # check if a hand is three of a kind
-    if ('3' in joined_histogram) & (len(kickers) == 2):
-        threeofakindcard = (joined_histogram[1:].find('3') + 2)
-        handName = "Three of a Kind " + cardnames[threeofakindcard -2] + " " + cardnames[kickers[0] - 2] + \
-            " " + cardnames[kickers[1] - 2]
+    elif ('3' in joined_histogram) & (len(kickers) == 2):
         handrankValue = (3,) + ((joined_histogram[1:].find('3') + 2),) + tuple(kickers)
 
     # check if a hand is two pairs
-    if ('2' in joined_histogram) & (len(kickers) == 1):
+    elif ('2' in joined_histogram) & (len(kickers) == 1):
         lowerpair = (joined_histogram[1:].find('2') + 2)
         higherpair = (joined_histogram[lowerpair:].find('2') + 1 + lowerpair)
-        handName = "Two pair " + cardnames[higherpair -2] + " and " + cardnames[lowerpair - 2] + " " + \
-            cardnames[kickers[0] - 2] + " kicker"
         handrankValue = (2,) + (higherpair, lowerpair) + tuple(kickers)
 
     # check if a hand is one pair
-    if ('2' in joined_histogram) & (len(kickers) == 3):
+    elif ('2' in joined_histogram) & (len(kickers) == 3):
         lowerpair = (joined_histogram[1:].find('2') + 2)
-        handName = "One pair " + cardnames[lowerpair - 2] + " kickers " + cardnames[kickers[0] - 2] \
-            + " " + cardnames[kickers[1] - 2] +  " " + cardnames[kickers[2] - 2]
         handrankValue = (1,) + (lowerpair,) + tuple(kickers)
 
-
     # evaluate high card hand
-    if (len(ranks_numerical) == len(set(ranks_numerical))) & (isStraight == False) & (isFlush == False):
-        handName = "High card " + cardnames[kickers[0] - 2] + " " + cardnames[kickers[1] - 2] \
-            + " " + cardnames[kickers[2] - 2] +  " " + cardnames[kickers[3] - 2] + " " + cardnames[kickers[4] - 2]
+    elif (len(ranks_numerical) == len(set(ranks_numerical))) & (isStraight == False) & (isFlush == False):
         handrankValue = (0,) + tuple(kickers)
 
     return {tuple(sorted(hand)) : rank_integer(handrankValue)}
 
 
-def build_hands_dict(cards, path):
+def build_hands_dict(path):
 
     ranked_hands_dict = {}
     t0 = time.time()
@@ -148,7 +124,7 @@ def build_hands_dict(cards, path):
         pickle.dump(ranked_hands_dict, f)
 
 # Uncomment this to build the pre-calculated dict of hand ranks
-build_hands_dict(cards, r'hands.p')
+
 
 # Function that given board and 2 cards gives back tuple of the best possible hand by searching through ranked_hands_dict keys
 def find_the_best_hand(board, hand, ranked_hands_dict):
