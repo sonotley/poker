@@ -132,13 +132,14 @@ if __name__ == '__main__':
         ranked_hands_dict = pickle.load(f)
 
     hand1 = {'2h', '7d'}
-    hand2 = {'Ad', 'Ah'}
+    hand2 = {'Ad', '3h'}
 
     possible_boards = populate_boards2(hand1, hand2)
     print(len(possible_boards))
 
+
     processes = []
-    num_processes = 1
+    num_processes = 3
     for i in range(num_processes):
         processes.append(mp.Process(target=get_board_and_score2,
                                     args=(possible_boards[i::num_processes], hand1, hand2, ranked_hands_dict, n, one, two,i)))

@@ -1,4 +1,4 @@
-from original import hand_v_hand
+from old.original import hand_v_hand
 import time
 
 tic=time.time()

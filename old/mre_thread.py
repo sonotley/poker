@@ -66,7 +66,7 @@ if __name__ == '__main__':
 
     q = Queue()
 
-    with open(r'hands.p','rb') as f:
+    with open(r'../hands.p', 'rb') as f:
         ranked_hands_dict = pickle.load(f)
 
     hand1 = {'2h', '7d'}
