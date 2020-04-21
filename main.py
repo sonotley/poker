@@ -18,8 +18,8 @@ def find_best_score(board, hand, ranked_hands_dict):
 
 
 def populate_boards(hand1, hand2):
-    ranks = ['2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A']
-    suits = ['h', 's', 'd', 'c']
+    ranks = ["2", "3", "4", "5", "6", "7", "8", "9", "A", "J", "K", "Q", "T"]
+    suits = ['c','d','h','s']
     cards = set()
     for suit in suits:
         for rank in ranks:
