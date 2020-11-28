@@ -5,6 +5,8 @@ from ctypes import c_longlong
 import time
 import psutil
 import cardsutils
+import math
+import json
 
 
 def find_best_score(board, hand, ranked_hands_dict):
@@ -13,7 +15,7 @@ def find_best_score(board, hand, ranked_hands_dict):
 
     all_possible_hands = itertools.combinations(seven_card_hand, 5)
     for hand in all_possible_hands:
-        evaluated_all_possible_hands.append(ranked_hands_dict[tuple(sorted(hand))])
+        evaluated_all_possible_hands.append(ranked_hands_dict[math.prod(hand)])
 
     return max(evaluated_all_possible_hands)
 
@@ -21,7 +23,8 @@ def find_best_score(board, hand, ranked_hands_dict):
 def populate_boards(hand1, hand2):
     cards = cardsutils.deck_as_set
     deadcards = hand1 | hand2
-    return tuple(itertools.combinations(cards - deadcards, 5))
+    live_primes = [cardsutils.deck_dict_with_primes[x] for x in (cards-deadcards)]
+    return tuple(itertools.combinations(live_primes, 5))
 
 
 def get_board_and_score(ls, hand1, hand2, ranked_hands_dict, n, one, two, i):
@@ -36,10 +39,13 @@ def get_board_and_score(ls, hand1, hand2, ranked_hands_dict, n, one, two, i):
     except AttributeError:
         print("CPU affinity not supported")
 
+    hand1_primes = set([cardsutils.deck_dict_with_primes[x] for x in hand1])
+    hand2_primes = set([cardsutils.deck_dict_with_primes[x] for x in hand2])
+
     for board in ls:
 
-        hand1rank = find_best_score(board, hand1, ranked_hands_dict)
-        hand2rank = find_best_score(board, hand2, ranked_hands_dict)
+        hand1rank = find_best_score(board, hand1_primes, ranked_hands_dict)
+        hand2rank = find_best_score(board, hand2_primes, ranked_hands_dict)
 
         if hand1rank > hand2rank:
             one_local += 1
@@ -58,7 +64,6 @@ def get_board_and_score(ls, hand1, hand2, ranked_hands_dict, n, one, two, i):
         n.value += n_local
     print(n_local, one_local, two_local,"--",i)
 
-
 if __name__ == '__main__':
 
     tic = time.time()
@@ -66,8 +71,8 @@ if __name__ == '__main__':
     hand1Wins = mp.Value(typecode_or_type=c_longlong)
     hand2Wins = mp.Value(typecode_or_type=c_longlong)
 
-    with open(r'hands.p', 'rb') as f:
-        ranked_hands_dict = pickle.load(f)
+    with open ('hands_prime.json','r') as f:
+        ranked_hands_dict={int(k):v for k,v in json.load(f).items()}
 
     hand1 = {'2h', '7d'}
     hand2 = {'Ad', '3h'}

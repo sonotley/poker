@@ -4,7 +4,6 @@ import json
 import cardsutils
 import math
 
-
 # Function dict_hand_rank ranks every board and returns a tuple (board) (value)
 def hand_rank_dict(hand, use_prime_key=False):
 
@@ -24,7 +23,6 @@ def hand_rank_dict(hand, use_prime_key=False):
         ranks_alphabetical.append(card[0])
 
     # create ranks_histogram where from A 2 ... J Q K A every card has the corresponding number of occurencies, A double counted
-
     ranks_histogram.append(str(ranks_alphabetical.count('A')))
 
     for rank in ranks:
@@ -32,9 +30,9 @@ def hand_rank_dict(hand, use_prime_key=False):
 
     joined_histogram = ''.join(ranks_histogram)
 
-    # create ranks numerical instead of T, J, Q, K A
+    # create ranks numerical instead of T, J, Q, K
     for card in hand:
-        ranks_numerical.append(ranks.index(card[0])+2)
+        ranks_numerical.append(cardsutils.ranks_map[card[0]])
 
     # create kickers
     kickers = sorted([x for x in ranks_numerical if ranks_numerical.count(x) <2], reverse = True)
@@ -112,4 +110,4 @@ def rank_integer(rank_tuple):
     return int(score)
 
 
-build_hands_dict(cardsutils.deck_as_set, r'hands_prime.json',use_prime_key=True)
+build_hands_dict(cardsutils.deck_as_set, r'hands.json',use_prime_key=False)
