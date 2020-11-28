@@ -39,13 +39,10 @@ def get_board_and_score(ls, hand1, hand2, ranked_hands_dict, n, one, two, i):
     except AttributeError:
         print("CPU affinity not supported")
 
-    hand1_primes = set([cardsutils.deck_dict_with_primes[x] for x in hand1])
-    hand2_primes = set([cardsutils.deck_dict_with_primes[x] for x in hand2])
-
     for board in ls:
 
-        hand1rank = find_best_score(board, hand1_primes, ranked_hands_dict)
-        hand2rank = find_best_score(board, hand2_primes, ranked_hands_dict)
+        hand1rank = find_best_score(board, hand1, ranked_hands_dict)
+        hand2rank = find_best_score(board, hand2, ranked_hands_dict)
 
         if hand1rank > hand2rank:
             one_local += 1
@@ -77,16 +74,19 @@ if __name__ == '__main__':
     hand1 = {'2h', '7d'}
     hand2 = {'Ad', '3h'}
 
+    hand1_primes = set([cardsutils.deck_dict_with_primes[x] for x in hand1])
+    hand2_primes = set([cardsutils.deck_dict_with_primes[x] for x in hand2])
+
     possible_boards = populate_boards(hand1, hand2)
 
     processes = []
     num_processes = 4
     if num_processes == 0:
-        get_board_and_score(possible_boards,hand1,hand2,ranked_hands_dict, draws, hand1Wins, hand2Wins, 0)
+        get_board_and_score(possible_boards,hand1_primes,hand2_primes,ranked_hands_dict, draws, hand1Wins, hand2Wins, 0)
     else:
         for i in range(num_processes):
             processes.append(mp.Process(target=get_board_and_score,
-                                        args=(possible_boards[i::num_processes], hand1, hand2, ranked_hands_dict, draws, hand1Wins, hand2Wins, i)))
+                                        args=(possible_boards[i::num_processes], hand1_primes, hand2_primes, ranked_hands_dict, draws, hand1Wins, hand2Wins, i)))
             processes[i].start()
 
         for p in processes:
