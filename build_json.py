@@ -110,4 +110,4 @@ def rank_integer(rank_tuple):
     return int(score)
 
 
-build_hands_dict(cardsutils.deck_as_set, r'hands.json',use_prime_key=False)
+build_hands_dict(cardsutils.deck_as_set, r'hands_prime.json',use_prime_key=True)
