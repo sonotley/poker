@@ -23,24 +23,26 @@ def hand_rank_dict(hand, use_prime_key=False):
         ranks_alphabetical.append(card[0])
 
     # create ranks_histogram where from A 2 ... J Q K A every card has the corresponding number of occurencies, A double counted
-    ranks_histogram.append(str(ranks_alphabetical.count('A')))
+    ranks_histogram.append(str(ranks_alphabetical.count("A")))
 
     for rank in ranks:
         ranks_histogram.append(str(ranks_alphabetical.count(rank)))
 
-    joined_histogram = ''.join(ranks_histogram)
+    joined_histogram = "".join(ranks_histogram)
 
     # create ranks numerical instead of T, J, Q, K
     for card in hand:
         ranks_numerical.append(cardsutils.ranks_map[card[0]])
 
     # create kickers
-    kickers = sorted([x for x in ranks_numerical if ranks_numerical.count(x) <2], reverse = True)
+    kickers = sorted(
+        [x for x in ranks_numerical if ranks_numerical.count(x) < 2], reverse=True
+    )
 
     # check if a hand is a straight
-    if '11111' in joined_histogram:
+    if "11111" in joined_histogram:
         is_straight = True
-        straight_height = joined_histogram.find('11111') + 5
+        straight_height = joined_histogram.find("11111") + 5
         handrank_value = (4,) + (straight_height,)
 
     # check if a hand is a flush
@@ -53,38 +55,49 @@ def hand_rank_dict(hand, use_prime_key=False):
         handrank_value = (8,) + (straight_height,)
 
     # check if a hand is four of a kind
-    if '4' in  joined_histogram:
-        handrank_value = (7,) + ((joined_histogram[1:].find('4') + 2),) + tuple(kickers)
+    if "4" in joined_histogram:
+        handrank_value = (7,) + ((joined_histogram[1:].find("4") + 2),) + tuple(kickers)
 
     # check if a hand is a full house
-    if ('3' in joined_histogram) & ('2' in joined_histogram):
-        handrank_value = (6,) + ((joined_histogram[1:].find('3') + 2),) + ((joined_histogram[1:].find('2') + 2),) + tuple(kickers)
-
+    if ("3" in joined_histogram) & ("2" in joined_histogram):
+        handrank_value = (
+            (6,)
+            + ((joined_histogram[1:].find("3") + 2),)
+            + ((joined_histogram[1:].find("2") + 2),)
+            + tuple(kickers)
+        )
 
     # check if a hand is three of a kind
-    if ('3' in joined_histogram) & (len(kickers) == 2):
-        handrank_value = (3,) + ((joined_histogram[1:].find('3') + 2),) + tuple(kickers)
+    if ("3" in joined_histogram) & (len(kickers) == 2):
+        handrank_value = (3,) + ((joined_histogram[1:].find("3") + 2),) + tuple(kickers)
 
     # check if a hand is two pairs
-    if ('2' in joined_histogram) & (len(kickers) == 1):
-        lowerpair = (joined_histogram[1:].find('2') + 2)
-        higherpair = (joined_histogram[lowerpair:].find('2') + 1 + lowerpair)
+    if ("2" in joined_histogram) & (len(kickers) == 1):
+        lowerpair = joined_histogram[1:].find("2") + 2
+        higherpair = joined_histogram[lowerpair:].find("2") + 1 + lowerpair
         handrank_value = (2,) + (higherpair, lowerpair) + tuple(kickers)
 
     # check if a hand is one pair
-    if ('2' in joined_histogram) & (len(kickers) == 3):
-        lowerpair = (joined_histogram[1:].find('2') + 2)
+    if ("2" in joined_histogram) & (len(kickers) == 3):
+        lowerpair = joined_histogram[1:].find("2") + 2
         handrank_value = (1,) + (lowerpair,) + tuple(kickers)
 
-
     # evaluate high card hand
-    if (len(ranks_numerical) == len(set(ranks_numerical))) & (is_straight == False) & (is_flush == False):
+    if (
+        (len(ranks_numerical) == len(set(ranks_numerical)))
+        & (is_straight == False)
+        & (is_flush == False)
+    ):
         handrank_value = (0,) + tuple(kickers)
 
     if use_prime_key:
-        return {math.prod([cardsutils.deck_dict_with_primes[x] for x in hand]): rank_integer(handrank_value)}
+        return {
+            math.prod(
+                [cardsutils.deck_dict_with_primes[x] for x in hand]
+            ): rank_integer(handrank_value)
+        }
     else:
-        return {''.join(sorted(hand)): rank_integer(handrank_value)}
+        return {"".join(sorted(hand)): rank_integer(handrank_value)}
 
 
 def build_hands_dict(deck, path, use_prime_key=False):
@@ -94,9 +107,9 @@ def build_hands_dict(deck, path, use_prime_key=False):
     for five_card_hand in itertools.combinations(deck, 5):
         ranked_hands_dict.update(hand_rank_dict(five_card_hand, use_prime_key))
     t1 = time.time()
-    total = t1-t0
+    total = t1 - t0
     print(total)
-    with open(path,'w') as f:
+    with open(path, "w") as f:
         json.dump(ranked_hands_dict, f)
 
 
@@ -110,4 +123,4 @@ def rank_integer(rank_tuple):
     return int(score)
 
 
-build_hands_dict(cardsutils.deck_as_set, r'hands_prime.json',use_prime_key=True)
+build_hands_dict(cardsutils.deck_as_set, r"hands_prime.json", use_prime_key=True)

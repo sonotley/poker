@@ -20,7 +20,7 @@ elif PARALLELISM == "THREAD":
     parallel = tr.Thread
 else:
     parallel = None
-
+    
 
 def find_best_score(board, hand, ranked_hands_dict):
     all_possible_hands = itertools.combinations(board | hand, 5)
