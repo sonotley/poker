@@ -8,9 +8,13 @@ import multiprocessing as mp
 import threading as tr
 
 parallelism = "THREAD"
+num_parallels = 8
 
 if parallelism == "PROCESS":
-    import psutil
+    try:
+    	import psutil
+    except:
+    	psutil = None
     parallel = mp.Process
 elif parallelism == "THREAD":
     parallel = tr.Thread
@@ -53,9 +57,9 @@ def get_board_and_score(ls, hand1, hand2, ranked_hands_dict, n, one, two, i):
     one_local = 0
     two_local = 0
     print(len(ls),'--',i)
-    if parallelism == "PROCESS":
-        this_process = psutil.Process()
+    if parallelism == "PROCESS":      
         try:
+            this_process = psutil.Process()
             this_process.cpu_affinity([i])
 
         except AttributeError:
@@ -129,7 +133,6 @@ if __name__ == '__main__':
     possible_boards = populate_boards(hand1_primes, hand2_primes,board)
 
     parallels = []
-    num_parallels = 4
     if num_parallels == 0 or parallel is None:
         get_board_and_score(possible_boards,hand1_primes,hand2_primes,ranked_hands_dict, draws, hand1Wins, hand2Wins, 0)
     else:
