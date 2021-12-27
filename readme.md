@@ -17,6 +17,12 @@ This has a dependency on the `primesieve` package.
 Now run `main_prime.py` and enter the cards as prompted. You can edit the values of `PARALLELISM` and `NUM_PARALLELS`
 in the code to change the method of parallel processing between threads and processes and the number of them.
 
+Alternatively you can run in non-interactive mode by passing the cards in as arguments
+
+    main_primes.py hand0_card0 hand0_card1 hand1_card0 hand1_card1 [flop_card0...]
+
+You can also control the parallelism by setting the environment variables `POKER_PARALLELISM` and `POKER_NUM_PARA`.
+
 In standard CPython on Linux it is usually fastest to select `PARALLELISM = "PROCESS"` and set `NUM_PARALLELS`
 equal to the number of cores you have. However, on other platforms (or very high core-counts) the overhead to start a 
 process is so high that a lower value is better. `NUM_PARALLELS = 0` disables parallelism entirely.

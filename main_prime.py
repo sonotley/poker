@@ -6,14 +6,19 @@ import json
 from math import prod
 import multiprocessing as mp
 import threading as tr
+from sys import argv
+from os import environ
 
-PARALLELISM = "THREAD"
-NUM_PARALLELS = 8
+env_parallelism = environ.get("POKER_PARALLELISM")
+env_num = environ.get("POKER_NUM_PARA")
+
+PARALLELISM = "PROCESS" if env_parallelism is None else env_parallelism
+NUM_PARALLELS = 4 if env_num is None else int(env_num)
 
 if PARALLELISM == "PROCESS":
     try:
         import psutil
-    except:
+    except ImportError:
         psutil = None
     parallel = mp.Process
 elif PARALLELISM == "THREAD":
@@ -94,31 +99,40 @@ if __name__ == "__main__":
         ranked_hands_dict = {int(k): v for k, v in json.load(f).items()}
 
     hands = []
+    flop = []
     board = None
 
-    for hand in range(2):
-        for card in range(2):
-            valid_input = False
-            while not valid_input:
-                c = input(f"Enter hand {hand}, card {card}: ")
-                try:
-                    hands.append(cardsutils.deck_dict_with_primes[c])
-                    valid_input = True
-                except KeyError:
-                    print("Not a valid input")
+    if len(argv) == 1:
+        for hand in range(2):
+            for card in range(2):
+                valid_input = False
+                while not valid_input:
+                    c = input(f"Enter hand {hand}, card {card}: ")
+                    try:
+                        hands.append(cardsutils.deck_dict_with_primes[c])
+                        valid_input = True
+                    except KeyError:
+                        print("Not a valid input")
 
-    if input("Do you know the flop? ").lower() in ["y", "yes"]:
-        flop = []
-        for card in range(3):
-            valid_input = False
-            while not valid_input:
-                c = input(f"Enter flop card {card}: ")
-                try:
-                    flop.append(cardsutils.deck_dict_with_primes[c])
-                    valid_input = True
-                except KeyError:
-                    print("Not a valid input")
-        board = set(flop)
+        if input("Do you know the flop? ").lower() in ["y", "yes"]:
+            for card in range(3):
+                valid_input = False
+                while not valid_input:
+                    c = input(f"Enter flop card {card}: ")
+                    try:
+                        flop.append(cardsutils.deck_dict_with_primes[c])
+                        valid_input = True
+                    except KeyError:
+                        print("Not a valid input")
+            board = set(flop)
+
+    elif len(argv) in (5, 8):
+        [hands.append(cardsutils.deck_dict_with_primes[x]) for x in argv[1:]]
+
+        if len(argv) == 8:
+            [flop.append(cardsutils.deck_dict_with_primes[x]) for x in argv[5:7]]
+    else:
+        raise IOError("Invalid number of arguments")
 
     hand1_primes = set(hands[:2])
     hand2_primes = set(hands[2:])
