@@ -1,6 +1,6 @@
 # Toy poker hand evaluator
 
-This is some code I wrote based on a Stack Overflow question (much of the code in `build_json.py` is the work of the OP).
+This is some code I wrote based on a [Stack Overflow question](https://stackoverflow.com/questions/59435354/how-can-i-speed-up-my-python-poker-hand-vs-hand-equity-calculator) (much of the code in `build_json.py` is the work of the OP, rioZg).
 
 It is not optimised for useability or nice code, but it is pretty optimised for speed. 
 I use it as a toy project to implement in new languages I am learning and to test the speed of different
