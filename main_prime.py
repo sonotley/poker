@@ -13,7 +13,7 @@ env_parallelism = environ.get("POKER_PARALLELISM")
 env_num = environ.get("POKER_NUM_PARA")
 
 PARALLELISM = "PROCESS" if env_parallelism is None else env_parallelism
-NUM_PARALLELS = 4 if env_num is None else int(env_num)
+NUM_PARALLELS = 0 if env_num is None else int(env_num)
 
 if PARALLELISM == "PROCESS":
     try:
@@ -131,6 +131,7 @@ if __name__ == "__main__":
 
         if len(argv) == 8:
             [flop.append(cardsutils.deck_dict_with_primes[x]) for x in argv[5:7]]
+            board = set(flop)
     else:
         raise IOError("Invalid number of arguments")
 
