@@ -80,3 +80,22 @@ fifty_two_primes: list[int] = [
 ]
 
 deck_dict_with_primes: dict[str, int] = dict(zip(deck_as_list, fifty_two_primes))
+
+
+def grouped(iterable, n):
+    "s -> (s0,s1,s2,...sn-1), (sn,sn+1,sn+2,...s2n-1), (s2n,s2n+1,s2n+2,...s3n-1), ..."
+    return zip(*[iter(iterable)]*n)
+
+
+def extract_cards_from_string(card_string: str) -> set[int]:
+    result = set()
+    for x in grouped(card_string, 2):
+        card = x[0].upper() + x[1].lower()
+        try:
+            result.add(deck_dict_with_primes[card])
+        except KeyError:
+            raise ValueError(f"Failed to interpret {card} as a valid card")
+
+    if len(card_string) != 2 * len(result):
+        raise ValueError(f"String '{card_string}' looks like {len(card_string)//2} cards but didn't parse - is there a duplicate?")
+    return result

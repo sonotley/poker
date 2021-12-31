@@ -9,7 +9,7 @@ from math import prod
 import multiprocessing as mp
 from multiprocessing.sharedctypes import Synchronized
 import threading as tr
-from sys import argv
+import argparse
 from os import environ
 
 env_parallelism = environ.get("POKER_PARALLELISM")
@@ -120,55 +120,49 @@ if __name__ == "__main__":
     with open("hands_prime.json", "r") as f:
         ranked_hands_dict = {int(k): v for k, v in json.load(f).items()}
 
-    hands = []
-    flop = []
-    board = None
+    parser = argparse.ArgumentParser()
 
-    if len(argv) == 1:
-        for hand in range(2):
-            for card in range(2):
-                valid_input = False
-                while not valid_input:
-                    c = input(f"Enter hand {hand}, card {card}: ")
-                    try:
-                        hands.append(cardsutils.deck_dict_with_primes[c])
-                        valid_input = True
-                    except KeyError:
-                        print("Not a valid input")
+    parser.add_argument(
+        "--hand1", "-h1", help="Cards in hand one as a string", type=str
+    )
+    parser.add_argument(
+        "--hand2", "-h2", help="Cards in hand one as a string", type=str, default=None
+    )
+    parser.add_argument(
+        "--board",
+        "-b",
+        help="Cards in the flop and optionally turn and river",
+        type=str,
+        default=None,
+    )
 
-        if input("Do you know the flop? ").lower() in ["y", "yes"]:
-            for card in range(3):
-                valid_input = False
-                while not valid_input:
-                    c = input(f"Enter flop card {card}: ")
-                    try:
-                        flop.append(cardsutils.deck_dict_with_primes[c])
-                        valid_input = True
-                    except KeyError:
-                        print("Not a valid input")
-            board = set(flop)
+    args = parser.parse_args()
 
-    elif len(argv) in (5, 8):
-        [hands.append(cardsutils.deck_dict_with_primes[x]) for x in argv[1:5]]
-
-        if len(argv) == 8:
-            [flop.append(cardsutils.deck_dict_with_primes[x]) for x in argv[5:7]]
-            board = set(flop)
-    else:
-        raise IOError("Invalid number of arguments")
-
-    hand1_primes = set(hands[:2])
-    hand2_primes = set(hands[2:])
+    hand1 = (
+        cardsutils.extract_cards_from_string(args.hand1)
+        if args.hand1 is not None
+        else None
+    )
+    hand2 = (
+        cardsutils.extract_cards_from_string(args.hand2)
+        if args.hand2 is not None
+        else None
+    )
+    board = (
+        cardsutils.extract_cards_from_string(args.board)
+        if args.board is not None
+        else None
+    )
 
     tic = time.time()
-    possible_boards = populate_boards(hand1_primes, hand2_primes, board)
+    possible_boards = populate_boards(hand1, hand2, board)
 
     parallels = []
     if NUM_PARALLELS == 0 or parallel is None:
         get_board_and_score(
             possible_boards,
-            hand1_primes,
-            hand2_primes,
+            hand1,
+            hand2,
             ranked_hands_dict,
             draws,
             hand1Wins,
@@ -182,8 +176,8 @@ if __name__ == "__main__":
                     target=get_board_and_score,
                     args=(
                         possible_boards[i::NUM_PARALLELS],
-                        hand1_primes,
-                        hand2_primes,
+                        hand1,
+                        hand2,
                         ranked_hands_dict,
                         draws,
                         hand1Wins,
