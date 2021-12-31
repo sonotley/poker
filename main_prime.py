@@ -149,7 +149,7 @@ if __name__ == "__main__":
             board = set(flop)
 
     elif len(argv) in (5, 8):
-        [hands.append(cardsutils.deck_dict_with_primes[x]) for x in argv[1:]]
+        [hands.append(cardsutils.deck_dict_with_primes[x]) for x in argv[1:5]]
 
         if len(argv) == 8:
             [flop.append(cardsutils.deck_dict_with_primes[x]) for x in argv[5:7]]
