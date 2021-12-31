@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import itertools
 from ctypes import c_longlong
 import time
@@ -5,6 +7,7 @@ import cardsutils
 import json
 from math import prod
 import multiprocessing as mp
+from multiprocessing.sharedctypes import Synchronized
 import threading as tr
 from sys import argv
 from os import environ
@@ -25,9 +28,13 @@ elif PARALLELISM == "THREAD":
     parallel = tr.Thread
 else:
     parallel = None
-    
 
-def find_best_score(board, hand, ranked_hands_dict):
+
+def find_best_score(
+    board: set[int], hand: set[int], ranked_hands_dict: dict[int, int]
+) -> int:
+    """Find the best scoring hand of five cards from a hand of two and board of five and return the score of that hand"""
+
     all_possible_hands = itertools.combinations(board | hand, 5)
     evaluated_all_possible_hands = [
         ranked_hands_dict[prod(hand)] for hand in all_possible_hands
@@ -36,8 +43,12 @@ def find_best_score(board, hand, ranked_hands_dict):
     return max(evaluated_all_possible_hands)
 
 
-def populate_boards(hand1, hand2, board=None):
-    cards = {cardsutils.deck_dict_with_primes[x] for x in cardsutils.deck_as_set}
+def populate_boards(
+    hand1: set[int], hand2: set[int], board: set[int] | None = None
+) -> tuple[set[int], ...]:
+    """Find all possible five-card boards given the known cards"""
+
+    cards = set(cardsutils.fifty_two_primes)
     if board is None:
         deadcards = hand1 | hand2
         return tuple(set(x) for x in itertools.combinations(cards - deadcards, 5))
@@ -51,20 +62,31 @@ def populate_boards(hand1, hand2, board=None):
         return (board,)
 
 
-def get_board_and_score(ls, hand1, hand2, ranked_hands_dict, n, one, two, i):
-    n_local = 0
+def get_board_and_score(
+    possible_boards: tuple[set[int], ...],
+    hand1: set[int],
+    hand2: set[int],
+    ranked_hands_dict: dict[int, int],
+    draw_counter: Synchronized,
+    hand1_win_counter: Synchronized,
+    hand2_win_counter: Synchronized,
+    parallelism_index: int,
+) -> None:
+    """Determine result for given hands for all possible boards and update counters accordingly"""
+
+    draw_local = 0
     one_local = 0
     two_local = 0
-    print(len(ls), "--", i)
+    print(len(possible_boards), "--", parallelism_index)
     if PARALLELISM == "PROCESS":
         try:
             this_process = psutil.Process()
-            this_process.cpu_affinity([i])
+            this_process.cpu_affinity([parallelism_index])
 
         except AttributeError:
             print("CPU affinity not supported")
 
-    for board in ls:
+    for board in possible_boards:
 
         hand1rank = find_best_score(board, hand1, ranked_hands_dict)
         hand2rank = find_best_score(board, hand2, ranked_hands_dict)
@@ -74,17 +96,17 @@ def get_board_and_score(ls, hand1, hand2, ranked_hands_dict, n, one, two, i):
         elif hand1rank < hand2rank:
             two_local += 1
         else:
-            n_local += 1
+            draw_local += 1
 
-    with one.get_lock():
-        one.value += one_local
+    with hand1_win_counter.get_lock():
+        hand1_win_counter.value += one_local
 
-    with two.get_lock():
-        two.value += two_local
+    with hand2_win_counter.get_lock():
+        hand2_win_counter.value += two_local
 
-    with n.get_lock():
-        n.value += n_local
-    print(n_local, one_local, two_local, "--", i)
+    with draw_counter.get_lock():
+        draw_counter.value += draw_local
+    print(draw_local, one_local, two_local, "--", parallelism_index)
 
 
 if __name__ == "__main__":

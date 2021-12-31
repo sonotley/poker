@@ -1,6 +1,8 @@
-ranks = ["2", "3", "4", "5", "6", "7", "8", "9", "T", "J", "Q", "K", "A"]
-suits = ["h", "s", "d", "c"]
-ranks_map = {
+from __future__ import annotations
+
+ranks: list[str] = ["2", "3", "4", "5", "6", "7", "8", "9", "T", "J", "Q", "K", "A"]
+suits: list[str] = ["h", "s", "d", "c"]
+ranks_map: dict[str, int] = {
     "2": 2,
     "3": 3,
     "4": 4,
@@ -15,14 +17,14 @@ ranks_map = {
     "Q": 12,
     "T": 10,
 }
-deck_as_list = []
+deck_as_list: list[str] = []
 for suit in suits:
     for rank in ranks:
         deck_as_list.append(rank + suit)
 
-deck_as_set = set(deck_as_list)
+deck_as_set: set[str] = set(deck_as_list)
 
-fifty_two_primes = [
+fifty_two_primes: list[int] = [
     2,
     3,
     5,
@@ -77,4 +79,4 @@ fifty_two_primes = [
     239,
 ]
 
-deck_dict_with_primes = dict(zip(deck_as_list, fifty_two_primes))
+deck_dict_with_primes: dict[str, int] = dict(zip(deck_as_list, fifty_two_primes))
