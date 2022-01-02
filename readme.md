@@ -16,7 +16,10 @@ This has a dependency on the `primesieve` package.
 
 Now run `main_prime.py`. See below for arguments. 
 
-    main_primes.py --hand1 2h3h --hand2 KdAs [--board 5s6s7s]
+    main_primes.py --hand1 2h3h [--hand2 KdAs] [--board 5s6s7s]
+
+Technically you can omit both `hand2` and `board` but you'll be waiting a very long time for an answer. 
+You can also supply partial definitions of either optional parameter, i.e. 0-2 cards for `hand2` and 0-5 for `board`.
 
 You can control the parallelism by setting the environment variables `POKER_PARALLELISM` and `POKER_NUM_PARA`.
 

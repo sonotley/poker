@@ -57,11 +57,24 @@ def get_possible_boards(
     )
 
 
+def get_possible_hands_and_boards(
+    hand1: set[int], hand2: set[int], board: set[int]
+) -> tuple[tuple[set[int], ...], ...]:
+    """Find all possible hand2 and board combinations given the known cards"""
+
+    cards = set(cardsutils.fifty_two_primes)
+    possible_combinations = []
+    possible_boards = get_possible_boards(hand1, hand2, board)
+    for possible_board in possible_boards:
+        deadcards = hand1 | hand2 | possible_board
+        possible_hands = [set(x).union(hand2) for x in itertools.combinations(cards - deadcards, 2 - len(hand2))]
+        possible_combinations.extend(zip(possible_hands, (possible_board,)*len(possible_hands)))
+    return tuple(possible_combinations)
+
 
 def get_board_and_score(
-    possible_boards: tuple[set[int], ...],
     hand1: set[int],
-    hand2: set[int],
+    possible_hands_and_boards: tuple[tuple[set[int], ...], ...],
     ranked_hands_dict: dict[int, int],
     draw_counter: Synchronized,
     hand1_win_counter: Synchronized,
@@ -73,7 +86,7 @@ def get_board_and_score(
     draw_local = 0
     one_local = 0
     two_local = 0
-    print(len(possible_boards), "--", parallelism_index)
+    print(len(possible_hands_and_boards), "--", parallelism_index)
     if PARALLELISM == "PROCESS":
         try:
             this_process = psutil.Process()
@@ -82,7 +95,7 @@ def get_board_and_score(
         except AttributeError:
             print("CPU affinity not supported")
 
-    for board in possible_boards:
+    for hand2, board in possible_hands_and_boards:
 
         hand1rank = find_best_score(board, hand1, ranked_hands_dict)
         hand2rank = find_best_score(board, hand2, ranked_hands_dict)
@@ -151,14 +164,14 @@ if __name__ == "__main__":
     )
 
     tic = time.time()
-    possible_boards = get_possible_boards(hand1, hand2, board)
+    # possible_boards = get_possible_boards(hand1, hand2, board)
+    possible_hands_and_boards = get_possible_hands_and_boards(hand1, hand2, board)
 
     parallels = []
     if NUM_PARALLELS == 0 or parallel is None:
         get_board_and_score(
-            possible_boards,
             hand1,
-            hand2,
+            possible_hands_and_boards,
             ranked_hands_dict,
             draws,
             hand1Wins,
@@ -171,9 +184,8 @@ if __name__ == "__main__":
                 parallel(
                     target=get_board_and_score,
                     args=(
-                        possible_boards[i::NUM_PARALLELS],
                         hand1,
-                        hand2,
+                        possible_hands_and_boards[i::NUM_PARALLELS],
                         ranked_hands_dict,
                         draws,
                         hand1Wins,
