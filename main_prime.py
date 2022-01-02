@@ -43,23 +43,19 @@ def find_best_score(
     return max(evaluated_all_possible_hands)
 
 
-def populate_boards(
-    hand1: set[int], hand2: set[int], board: set[int] | None = None
+def get_possible_boards(
+    hand1: set[int], hand2: set[int], board: set[int]
 ) -> tuple[set[int], ...]:
     """Find all possible five-card boards given the known cards"""
 
     cards = set(cardsutils.fifty_two_primes)
-    if board is None:
-        deadcards = hand1 | hand2
-        return tuple(set(x) for x in itertools.combinations(cards - deadcards, 5))
-    elif len(board) < 5:
-        deadcards = hand1 | hand2 | board
-        return tuple(
-            set(x).union(board)
-            for x in itertools.combinations(cards - deadcards, 5 - len(board))
-        )
-    else:
-        return (board,)
+    deadcards = hand1 | hand2 | board
+
+    return tuple(
+        set(x).union(board)
+        for x in itertools.combinations(cards - deadcards, 5 - len(board))
+    )
+
 
 
 def get_board_and_score(
@@ -141,21 +137,21 @@ if __name__ == "__main__":
     hand1 = (
         cardsutils.extract_cards_from_string(args.hand1)
         if args.hand1 is not None
-        else None
+        else set()
     )
     hand2 = (
         cardsutils.extract_cards_from_string(args.hand2)
         if args.hand2 is not None
-        else None
+        else set()
     )
     board = (
         cardsutils.extract_cards_from_string(args.board)
         if args.board is not None
-        else None
+        else set()
     )
 
     tic = time.time()
-    possible_boards = populate_boards(hand1, hand2, board)
+    possible_boards = get_possible_boards(hand1, hand2, board)
 
     parallels = []
     if NUM_PARALLELS == 0 or parallel is None:
